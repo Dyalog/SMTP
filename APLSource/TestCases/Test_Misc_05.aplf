@@ -1,0 +1,26 @@
+ R←Test_Misc_05(stopFlag batchFlag);⎕IO;⎕ML;⎕TRAP;parms;rc;msg;ref;filename
+⍝ Send an email with a two attachments: an HTML file and a PDF file
+ ⎕IO←1 ⋄ ⎕ML←1
+ ⎕TRAP←(999 'C' '. ⍝ Deliberate error')(0 'N')
+ R←T._Failed
+
+ parms←⎕NS''
+ parms.To←∆SERVER.Userid
+ parms.CC←∆TO
+ parms.Subj←'From Dyalog SMTP: ',⊃⎕SI
+ parms.Body←'Simple text'
+ parms.Body,←⎕UCS 13 10
+
+ parms.Attachments←''
+ filename←'./Files/APL-Code.pdf'
+ parms.Attachments,←⊂filename'application/pdf'
+ filename←'./Files/CrashReport.html'
+ parms.Attachments,←⊂filename'text/html'
+
+ (rc msg ref)←∆SERVER ##.SendMail parms
+ Assert 0=rc
+
+ :If ∆ConfirmEmailOkay'(check for two attachments: a PDF and an HTML file)'
+     R←T._OK
+ :EndIf
+⍝Done

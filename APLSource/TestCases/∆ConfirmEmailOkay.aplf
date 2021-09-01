@@ -1,0 +1,2 @@
+ r←∆ConfirmEmailOkay caption
+ r←1 ∆YesOrNo'Check ',∆TO,' - did you receive an email? ',caption
