@@ -1,17 +1,25 @@
-﻿ (rc msg server)←serverArgs SendMail messageArgs;⎕ML;⎕IO;params;msgParams;log;server
+﻿ (rc msg client log)←clientArgs SendMail messageArgs;⎕ML;⎕IO;params;msgParams;log
  ⍝ Simple cover to send SMTP mail
  ⍝ Requires: SMTP class
 
- ⍝ rc   - return code; 0=no error, 1=error from the SMTP server, anything else=other error
- ⍝ msg  - descriptive message
- ⍝ server - reference to instance of SMTP (only returned when serverArgs is the server definition)
+ ⍝ rc     - return code; 0=no error, 1=error from the SMTP server, anything else=other error
+ ⍝ msg    - descriptive message
+ ⍝ client - reference to instance of SMTP (only returned when clientArgs is the server definition)
+ ⍝ log    - log of server responses
 
 
- ⍝ serverArgs is one of:
- ⍝ A server definition in one of the following formats:
+ ⍝ clientArgs is one of:
+ ⍝ A client definition in one of the following formats:
  ⍝   ∘ a vector of Server Port From [Password [Userid [Secure]]]
  ⍝   ∘ a namespace containing required named elements: Server Port From
  ⍝     and optionally Password Userid Secure plus any other parameters applicable to the SMTP class
+ ⍝   where
+ ⍝     Server   - address of the SMTP server
+ ⍝     Port     - port for the SMTP server
+ ⍝     From     - "from" email address; if Userid is not specified From is also used for authentication if necessary
+ ⍝     Password - password to access the SMTP server
+ ⍝     Userid   - userid for authentication; not needed if it's the same as From
+ ⍝     Secure   - Boolean indicating whether to use SSL/TLS; if not specified Secure will be inferred from the Port
  ⍝ Or
  ⍝   ∘ an instance of the SMTP class created by SendMail
 
@@ -20,44 +28,44 @@
  ⍝ ∘ a namespace containing required named elements: To Subj Body
  ⍝     and optionally any other parameters applicable to the SMTP.Message class
 
- ⍝ Once the SMTP server instance has been created, it is passed as the left argument
+ ⍝ Once the SMTP client instance has been created, it can be passed as the left argument
  ⍝ in subsequent calls to Sendmail
 
  ⍝ Examples:
- ⍝ (srv←⎕NS'').(Server Port From Password)←'mail.abc.com' 465 'me@abc.com' 'secret'
- ⍝ Server←3⊃srv SendMail '' ⍝ create the server instance
+ ⍝ (clt←⎕NS'').(Server Port From Password)←'mail.abc.com' 465 'me@abc.com' 'secret'
+ ⍝ Client←3⊃clt SendMail '' ⍝ create the client instance
  ⍝ (msg←⎕NS'').(To Subj Body)←'you@xyz.com' 'Hello' 'Hi there!'
- ⍝ Server SendMail msg
+ ⍝ Client SendMail msg      ⍝ client instance is the left argument here
  ⍝
- ⍝ The server can be created and message sent in a single call:
- ⍝ Server←3⊃srv SendMail msg
+ ⍝ The client instance can be created and message sent in a single call:
+ ⍝ Client←3⊃clt SendMail msg
 
  ⎕IO←⎕ML←1
 
- (rc msg server)←¯1 'Nothing done' ''
+ (rc msg client log)←¯1 'Nothing done' '' ''
  params←0
- :Select ⎕NC⊂'serverArgs'
- :Case 2.1 ⋄ params←⎕NS'' ⋄ params.(Server Port From Password Userid Secure)←''⍬'' '' '' ¯1{(≢⍺)↑⍵,⍺↓⍨≢⍵},⊆serverArgs
- :Case 9.1 ⋄ params←serverArgs
- :Case 9.2 ⋄ server←serverArgs
+ :Select ⎕NC⊂'clientArgs'
+ :Case 2.1 ⋄ params←⎕NS'' ⋄ params.(Server Port From Password Userid Secure)←''⍬'' '' '' ¯1{(≢⍺)↑⍵,⍺↓⍨≢⍵},⊆clientArgs
+ :Case 9.1 ⋄ params←clientArgs
+ :Case 9.2 ⋄ client←clientArgs
  :Case 0 ⍝ not defined? do nothing
- :Else ⋄ →Exit⊣(rc msg)←¯1 'Invalid serverArgs' ⍝ paranoia
+ :Else ⋄ →Exit⊣(rc msg)←¯1 'Invalid clientArgs' ⍝ paranoia
  :EndSelect
 
  :If params≢0
-     :Trap 0 ⋄ server←⎕NEW SMTP params
+     :Trap 0 ⋄ client←⎕NEW SMTP params
      :Else ⋄ →Exit⊣(rc msg)←⎕DMX.(EN(EM,' while creating client'))
      :EndTrap
      (rc msg)←0 'SMTPClient created'
  :EndIf
 
  :If ~0∊⍴messageArgs
-     :If 0∊⍴server ⋄ →Exit⊣(rc msg)←¯1 'No SMTPClient defined' ⋄ :EndIf
+     :If 0∊⍴client ⋄ →Exit⊣(rc msg)←¯1 'No SMTPClient defined' ⋄ :EndIf
      :Select ⎕NC⊂'messageArgs'
      :Case 2.1 ⋄ msgParams←⎕NS'' ⋄ msgParams.(To Subj Body)←'' '' ''{(≢⍺)↑⍵,⍺↓⍨≢⍵},⊆messageArgs
      :Case 9.1 ⋄ msgParams←messageArgs
      :Else ⋄ →Exit⊣(rc msg)←¯1 'Invalid messageArgs' ⍝ paranoia
      :EndSelect
-     (rc msg log)←server.Send msgParams
+     (rc msg log)←client.Send msgParams
  :EndIf
 Exit:

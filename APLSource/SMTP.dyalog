@@ -165,7 +165,10 @@
       :If 0∊⍴From ⋄ From←Userid ⋄ :EndIf
      
       →Exit if 0<≢msg←(0∊⍴From)/'No From address specified'
-      :If 0∊⍴mail.From ⋄ mail.From←From ⋄ :EndIf
+      :If 0=mail.⎕NC'From'
+      :OrIf 0∊⍴mail.From
+          mail.From←From
+      :EndIf
      
       :Select ⎕NC⊂'mail'
       :Case 9.2 ⍝ instance
