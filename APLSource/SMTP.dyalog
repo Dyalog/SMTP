@@ -30,7 +30,7 @@
 
     ∇ r←Version
       :Access public shared
-      r←'SMTP' '1.3' '2021-03-02'
+      r←'SMTP' '1.4' '2021-09-09'
     ∇
 
     :property EHLOResponse
@@ -608,10 +608,12 @@
         ∇
 
         ∇ list←type FormatList list
+          :Access public shared
+        ⍝ list may be a matrix, a simple (delimited) vector, or a vector of vectors
           :If ~0∊⍴list
               :If 2=≢⍴list ⍝ matrix of names?
                   list←↓list
-              :Else
+              :ElseIf (≡list)∊0 1
                   list←list((~∊)⊆⊣)',;' ⍝ otherwise split on ; or ,
               :EndIf
               list←{⍵↓⍨-+/∧\' '=⌽⍵}¨list

@@ -2,6 +2,8 @@
  ⍝ Simple cover to send SMTP mail
  ⍝ Requires: SMTP class
 
+ ⍝ Version 1.1 2021-09-09
+
  ⍝ rc     - return code; 0=no error, 1=error from the SMTP server, anything else=other error
  ⍝ msg    - descriptive message
  ⍝ client - reference to instance of SMTP (only returned when clientArgs is the server definition)
