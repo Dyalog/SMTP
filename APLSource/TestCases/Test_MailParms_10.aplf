@@ -1,0 +1,12 @@
+ R←Test_MailParms_10(stopFlag batchFlag);⎕IO;⎕ML;⎕TRAP;myParams;expected;dmx;buff
+⍝ Check all property names
+ ⎕IO←1 ⋄ ⎕ML←1
+ ⎕TRAP←(999 'C' '. ⍝ Deliberate error')(0 'N')
+ R←T._Failed
+
+ myParams←⎕NEW SMTP.MailParameters
+ expected←'To' 'CC' 'BCC' 'Subject' 'Body' 'Attachments' 'From'
+ →T.PassesIf expected ∆LazyMatch myParams.⎕NL-2
+
+ R←T._OK
+⍝Done

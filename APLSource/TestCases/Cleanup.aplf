@@ -1,2 +1,3 @@
-Cleanup
-⎕ex'∆SERVER'
+ Cleanup
+ ⎕EX'∆CONNECTION'
+ ⎕EX'∆TO'

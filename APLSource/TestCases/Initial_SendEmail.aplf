@@ -1,0 +1,11 @@
+ r←Initial_SendEmail;flag
+ r←flag←0
+ ⎕←'Please enter your email address (empty=quit without sending emails) :'
+ :Repeat
+     ∆TO←⍞
+     :If 0=≢∆TO
+         :Return
+     :EndIf
+     flag←('@'∊∆TO)∧~∨/',;'∊∆TO
+ :Until flag
+ r←1

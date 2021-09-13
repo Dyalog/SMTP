@@ -1,0 +1,13 @@
+ R←Test_Attachments_003(stopFlag batchFlag);⎕IO;⎕ML;⎕TRAP;ref;filename
+⍝ Create attachments for a file with an unknown mime type and then set it
+ ⎕IO←1 ⋄ ⎕ML←1
+ ⎕TRAP←(999 'C' '. ⍝ Deliberate error')(0 'N')
+ R←T._Failed
+
+ filename←'./Test-Files/ExoticExtension.xyz-abc'
+ ref←⎕NEW SMTP.Attachment(,⊂filename)
+ →T.PassesIf ref.filename≡filename
+ ref.mimeType←'unknown/unknown'
+
+ R←T._OK
+⍝Done

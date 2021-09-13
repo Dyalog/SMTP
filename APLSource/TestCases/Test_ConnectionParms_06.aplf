@@ -1,0 +1,28 @@
+ R←Test_ConnectionParms_06(stopFlag batchFlag);⎕IO;⎕ML;⎕TRAP;myParams;dmx;buff
+⍝ Check the "Secure" property
+ ⎕IO←1 ⋄ ⎕ML←1
+ ⎕TRAP←(999 'C' '. ⍝ Deliberate error')(0 'N')
+ R←T._Failed
+
+ myParams←⎕NEW SMTP.ConnectionParameters
+
+ myParams.Secure←buff←0
+ →T.PassesIf buff≡myParams.Secure
+
+ :Trap 0
+     myParams.Secure←1 2
+     →T.PassesIf 0
+ :Else
+     dmx←⎕DMX
+     →T.PassesIf'Secure: not a Boolean'≡dmx.EM
+ :EndTrap
+
+ :Trap 0
+     myParams.Secure←'One' 'Two'
+     →T.PassesIf 0
+ :Else
+     dmx←⎕DMX
+     →T.PassesIf'Secure: not a Boolean'≡dmx.EM
+ :EndTrap
+
+ R←T._OK

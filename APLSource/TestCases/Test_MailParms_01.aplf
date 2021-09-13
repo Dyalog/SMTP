@@ -1,0 +1,44 @@
+ R←Test_MailParms_01(stopFlag batchFlag);⎕IO;⎕ML;⎕TRAP;myParams;dmx;buff
+⍝ Check the "To" property
+ ⎕IO←1 ⋄ ⎕ML←1
+ ⎕TRAP←(999 'C' '. ⍝ Deliberate error')(0 'N')
+ R←T._Failed
+
+ myParams←⎕NEW SMTP.MailParameters
+
+ myParams.To←buff←'kai@aplteam.com'
+ →T.PassesIf buff≡myParams.To
+
+ :Trap 0
+     myParams.To←1 2
+     →T.PassesIf 0
+ :Else
+     dmx←⎕DMX
+     →T.PassesIf'To: not a simple character vector'≡dmx.EM
+ :EndTrap
+
+ :Trap 0
+     myParams.To←'kai(at)aplteam.com'
+     →T.PassesIf 0
+ :Else
+     dmx←⎕DMX
+     →T.PassesIf'To: does not contain an @ symbol'≡dmx.EM
+ :EndTrap
+
+ :Trap 0
+     myParams.To←'a@b.'
+     →T.PassesIf 0
+ :Else
+     dmx←⎕DMX
+     →T.PassesIf'To: invalid email address'≡dmx.EM
+ :EndTrap
+
+ :Trap 0
+     myParams.To←'kai(at)aplteam.com,john.doe@wherever.com'
+     →T.PassesIf 0
+ :Else
+     dmx←⎕DMX
+     →T.PassesIf'To: you must not specify more than one email address'≡dmx.EM
+ :EndTrap
+
+ R←T._OK

@@ -1,0 +1,25 @@
+ R←Test_ConnectionParms_20(stopFlag batchFlag);⎕IO;⎕ML;⎕TRAP;myParams;dmx;buff;msg
+⍝ Exercise the "PerformChecks" method
+ ⎕IO←1 ⋄ ⎕ML←1
+ ⎕TRAP←(999 'C' '. ⍝ Deliberate error')(0 'N')
+ R←T._Failed
+
+ myParams←⎕NEW SMTP.ConnectionParameters
+
+ msg←myParams.PerformChecks ⍬
+ →T.PassesIf 3=','+.=msg
+ myParams.Userid←'Foo'
+ msg←myParams.PerformChecks ⍬
+ →T.PassesIf 2=','+.=msg
+ myParams.Password←'12345678'
+ msg←myParams.PerformChecks ⍬
+ →T.PassesIf 1=','+.=msg
+ myParams.Server←'smtp.google.com'
+ msg←myParams.PerformChecks ⍬
+ →T.PassesIf 0=','+.=msg
+ →T.PassesIf 0<≢msg
+ myParams.Domain←'wherever.com'
+ msg←myParams.PerformChecks ⍬
+ →T.PassesIf 0=≢msg
+
+ R←T._OK

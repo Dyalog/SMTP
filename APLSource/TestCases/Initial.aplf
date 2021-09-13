@@ -1,22 +1,12 @@
- r←Initial;cfg;parms;rc;msg;flag
+ r←Initial;cfg;parms
  r←0
  cfg←##.PromaConfig.USER
- parms←⎕NS''
+ SMTP←##.SMTP.API
+ parms←⎕NEW SMTP.ConnectionParameters
  parms.Server←cfg.SMTP_Server
  parms.Port←cfg.Port
- parms.From←cfg.From
  parms.Userid←cfg.EmailAddress
  parms.Password←cfg.EmailPassword
- (rc msg ∆SERVER)←parms ##.SendMail''
- 'Check "rc" and "msg"'Assert 0=rc
- flag←0
- ⎕←'Please enter your email address (empty=quit) :'
- :Repeat
-     ∆TO←⍞
-     :If 0=≢∆TO
-         :Return
-     :EndIf
-     flag←('@'∊∆TO)∧~∨/',;'∊∆TO
- :Until flag
+ ∆CONNECTION←⎕NEW SMTP.Connection(,⊂parms)
  r←1
 ⍝Done

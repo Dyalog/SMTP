@@ -1,0 +1,18 @@
+ R←Test_SendEmail_01(stopFlag batchFlag);⎕IO;⎕ML;⎕TRAP;parms;rc;msg;log
+⍝ Send the most simple email
+ ⎕IO←1 ⋄ ⎕ML←1
+ ⎕TRAP←(999 'C' '. ⍝ Deliberate error')(0 'N')
+ R←T._Failed
+
+ parms←⎕NEW SMTP.MailParameters
+ parms.To←∆CONNECTION.ConnectionParms.Userid
+ parms.CC←∆TO
+ parms.Subject←'Created by SMTP''s ',⊃⎕SI
+ parms.Body←'Test mail'
+ (rc msg log)←∆CONNECTION.Send parms
+ Assert 0=rc
+
+ :If ∆ConfirmEmailOkay''
+     R←T._OK
+ :EndIf
+⍝Done

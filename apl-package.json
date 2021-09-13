@@ -1,0 +1,15 @@
+{
+  api: "API",
+  assets: "SMTP_Help.html",
+  description: "SMTP client for sending emails from within Dyalog APL",
+  group: "dyalog",
+  info_url: "https://github.com/dyalog/SMTP",
+  io: 1,
+  ml: 1,
+  name: "SMTP",
+  source: "APLSource/SMTP",
+  tags: "linux,mac-os,windows,smtp,email",
+  version: "2.0.0-beta-1+71",
+  wx: 3,
+}
+

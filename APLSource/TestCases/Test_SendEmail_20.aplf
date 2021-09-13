@@ -1,0 +1,10 @@
+ R←Test_SendEmail_20(stopFlag batchFlag);⎕IO;⎕ML;⎕TRAP;res
+⍝ Exercise the SendEmailExample function
+ ⎕IO←1 ⋄ ⎕ML←1
+ ⎕TRAP←(999 'C' '. ⍝ Deliberate error')(0 'N')
+ R←T._Failed
+
+ res←SMTP.SendEmailExample ∆TO
+ →T.PassesIf'Email was sent successfully'≡res
+
+⍝Done

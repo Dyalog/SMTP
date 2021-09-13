@@ -1,0 +1,28 @@
+ R←Test_ConnectionParms_10(stopFlag batchFlag);⎕IO;⎕ML;⎕TRAP;myParams;dmx;buff
+⍝ Check the "XMailer" property
+ ⎕IO←1 ⋄ ⎕ML←1
+ ⎕TRAP←(999 'C' '. ⍝ Deliberate error')(0 'N')
+ R←T._Failed
+
+ myParams←⎕NEW SMTP.ConnectionParameters
+
+ myParams.XMailer←buff←'John Doe''s stuff'
+ →T.PassesIf buff≡myParams.XMailer
+
+ :Trap 0
+     myParams.XMailer←1 2
+     →T.PassesIf 0
+ :Else
+     dmx←⎕DMX
+     →T.PassesIf'XMailer: not a simple character vector'≡dmx.EM
+ :EndTrap
+
+ :Trap 0
+     myParams.XMailer←'One' 'Two'
+     →T.PassesIf 0
+ :Else
+     dmx←⎕DMX
+     →T.PassesIf'XMailer: not a simple character vector'≡dmx.EM
+ :EndTrap
+
+ R←T._OK

@@ -1,0 +1,28 @@
+ R←Test_ConnectionParms_03(stopFlag batchFlag);⎕IO;⎕ML;⎕TRAP;myParams;dmx;buff
+⍝ Check the "Server" property
+ ⎕IO←1 ⋄ ⎕ML←1
+ ⎕TRAP←(999 'C' '. ⍝ Deliberate error')(0 'N')
+ R←T._Failed
+
+ myParams←⎕NEW SMTP.ConnectionParameters
+
+ myParams.Server←buff←'smtp.google.com'
+ →T.PassesIf buff≡myParams.Server
+
+ :Trap 0
+     myParams.Server←1 2
+     →T.PassesIf 0
+ :Else
+     dmx←⎕DMX
+     →T.PassesIf'Server: not a simple character vector'≡dmx.EM
+ :EndTrap
+
+ :Trap 0
+     myParams.Server←'One' 'Two'
+     →T.PassesIf 0
+ :Else
+     dmx←⎕DMX
+     →T.PassesIf'Server: not a simple character vector'≡dmx.EM
+ :EndTrap
+
+ R←T._OK

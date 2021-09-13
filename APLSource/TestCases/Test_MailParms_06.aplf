@@ -1,0 +1,43 @@
+ R←Test_MailParms_06(stopFlag batchFlag);⎕IO;⎕ML;⎕TRAP;myParams;dmx;buff;myAttachment
+⍝ Check the "Attachment" property
+ ⎕IO←1 ⋄ ⎕ML←1
+ ⎕TRAP←(999 'C' '. ⍝ Deliberate error')(0 'N')
+ R←T._Failed
+
+ myParams←⎕NEW SMTP.MailParameters
+
+ myAttachment←⎕NEW SMTP.Attachment(,⊂'./Test-Files/ExoticExtension.xyz-abc')
+
+ :Trap 0
+     myParams.Attachments,←myAttachment
+     →T.PassesIf 0
+ :Else
+     dmx←⎕DMX
+     →T.PassesIf'Use the AddAttachment method'≡dmx.EM
+ :EndTrap
+
+ myParams.AddAttachment myAttachment
+ →T.PassesIf 1=≢myParams.Attachments
+
+ myParams.Attachments←''
+ →T.PassesIf 0=≢myParams.Attachments
+
+ myAttachment←⎕NEW SMTP.Attachment('./Test-Files/ExoticExtension.xyz-abc' 'abc/xyz')
+ myParams.AddAttachment myAttachment
+ →T.PassesIf 1=≢myParams.Attachments
+
+ myParams.AddAttachment'./Test-Files/ExoticExtension.xyz-abc'
+ →T.PassesIf 2=≢myParams.Attachments
+
+ myParams.AddAttachment('./Test-Files/ExoticExtension.xyz-abc' 'abc/xyz')
+ →T.PassesIf 3=≢myParams.Attachments
+
+ :Trap 0
+     myParams.AddAttachment('./Test-Files/ExoticExtension.xyz-abc' 'abc/xyz' 'Too many')
+     →T.PassesIf 0
+ :Else
+     dmx←⎕DMX
+     →T.PassesIf'Neither a filename nor a filename plus a mime type nor an instance of the "Attachment" class'≡dmx.EM
+ :EndTrap
+
+ R←T._OK

@@ -1,0 +1,25 @@
+ Make flag;F;targetPath;home;ref;buff
+⍝ This function re-creates the Dist/ folder in the project folder and populates it
+⍝ with a Tatin package "SMTP", a ZIP file ready to be published on a Tatin server.
+ :If flag
+     F←##.TestCases.FilesAndDirs
+     home←##.PromaConfig.HOME
+     'Could not find "apl-package.json"'⎕SIGNAL 11/⍨0=F.IsFile home,'/apl-package.json'
+     targetPath←home,'/Dist/'
+     F.RmDir targetPath
+     'Create!'F.CheckPath targetPath
+     targetPath ⎕NCOPY'SMTP_Help.html'
+     IncreaseBuildNumber ⍬
+     ref←#.⎕NS''
+     ref.PackageConfig←buff←⊃⎕NGET'apl-package.json' 1
+     ref.(⎕ED'PackageConfig')
+     :If buff≢ref.PackageConfig
+         (⊂ref.PackageConfig)⎕NPUT'apl-package.json' 1
+     :EndIf
+     (targetPath,'apl-package.json')⎕NCOPY'apl-package.json'
+     {}⎕SE.Tatin.Pack home targetPath
+     ⎕←'Package successfully created'
+ :Else
+     ⎕←'No action taken'
+ :EndIf
+⍝Done

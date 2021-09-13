@@ -4,20 +4,25 @@
  ⎕TRAP←(999 'C' '. ⍝ Deliberate error')(0 'N')
  R←T._Failed
 
- filename←'./Files/APL-Code.pdf'
- ref←⎕NEW ##.Attachment(,⊂filename)
+ filename←'./Test-Files/APL-Code.pdf'
+ ref←⎕NEW SMTP.Attachment(,⊂filename)
  →T.PassesIf ref.filename≡filename
  →T.PassesIf ref.mimeType≡'application/pdf'
 
- filename←'./Files/goo.zip'
- ref←⎕NEW ##.Attachment(,⊂filename)
+ filename←'./Test-Files/goo.zip'
+ ref←⎕NEW SMTP.Attachment(,⊂filename)
  →T.PassesIf ref.filename≡filename
  →T.PassesIf ref.mimeType≡'application/zip'
 
- filename←'./Files/foo.firlefanz'
- ref←⎕NEW ##.Attachment(,⊂filename)
+ filename←'./Test-Files/foo.firlefanz'
+ ref←⎕NEW SMTP.Attachment(,⊂filename)
  →T.PassesIf ref.filename≡filename
- →T.PassesIf 0=≢ref.mimeType
+ →T.PassesIf'application/octet-stream'≡ref.mimeType
+
+ filename←'./Test-Files/HasNoExtension'
+ ref←⎕NEW SMTP.Attachment(,⊂filename)
+ →T.PassesIf ref.filename≡filename
+ →T.PassesIf'application/octet-stream'≡ref.mimeType
 
  R←T._OK
 ⍝Done

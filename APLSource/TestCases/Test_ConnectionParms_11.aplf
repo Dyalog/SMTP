@@ -1,0 +1,44 @@
+ R←Test_ConnectionParms_11(stopFlag batchFlag);⎕IO;⎕ML;⎕TRAP;myParams;dmx;buff
+⍝ Check the "TLSFlags" property
+ ⎕IO←1 ⋄ ⎕ML←1
+ ⎕TRAP←(999 'C' '. ⍝ Deliberate error')(0 'N')
+ R←T._Failed
+
+ myParams←⎕NEW SMTP.ConnectionParameters
+
+ myParams.TLSFlags←buff←64
+ →T.PassesIf buff≡myParams.TLSFlags
+
+ :Trap 0
+     myParams.TLSFlags←1 2
+     →T.PassesIf 0
+ :Else
+     dmx←⎕DMX
+     →T.PassesIf'TLSFlags: not a single integer in 1,2*⍳7 '≡dmx.EM
+ :EndTrap
+
+ :Trap 0
+     myParams.TLSFlags←'One' 'Two'
+     →T.PassesIf 0
+ :Else
+     dmx←⎕DMX
+     →T.PassesIf'TLSFlags: invalid data type'≡dmx.EM
+ :EndTrap
+
+ :Trap 0
+     myParams.TLSFlags←1024
+     →T.PassesIf 0
+ :Else
+     dmx←⎕DMX
+     →T.PassesIf'TLSFlags: not a single integer in 1,2*⍳7'≡dmx.EM
+ :EndTrap
+
+ :Trap 0
+     myParams.TLSFlags←'One'
+     →T.PassesIf 0
+ :Else
+     dmx←⎕DMX
+     →T.PassesIf'TLSFlags: invalid data type'≡dmx.EM
+ :EndTrap
+
+ R←T._OK

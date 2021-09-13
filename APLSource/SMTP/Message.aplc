@@ -1,6 +1,6 @@
 :Class Message
     :Field public From←''
-    :Field public Subj←''
+    :Field public Subject←''
     :Field public ReplyTo←''
     :Field public Org←''
     :Field public To←''           ⍝ vector of email addresses
@@ -29,64 +29,41 @@
         ∇
     :EndProperty
 
-    default←{0∊⍴⍺ : ⍵ ⋄ ⍺}
-
-    ∇ make
+    ∇ make1(_Client connectionParams mailParams)
       :Access public
       :Implements constructor
+      Client←_Client
+      XMailer←connectionParams.XMailer
+      ReplyTo←connectionParams.ReplyTo
+      Org←connectionParams.Org
+      From←mailParams.From
+      Subject←mailParams.Subject
+      Body←mailParams.Body
+      CC←mailParams.CC
+      BCC←mailParams.BCC
+      Attachments←mailParams.Attachments
     ∇
 
-    ∇ make1 args
+    ∇ (rc msg text)←Compose mailParams;addHeader;haveAtts;boundary;mime;body;atts;i;n;att;⎕TRAP
       :Access public
-      :Implements constructor
-      :Select ⎕NC⊂'args' ⍝ namespace?
-      :Case 9.1
-          args{
-              0=⍺.⎕NC ⍵:shy←⍬
-              ⍎⍵,'←⍺⍎⍵'
-          }¨'From' 'Subj' 'ReplyTo' 'Org' 'To' 'CC' 'BCC' 'MIMEType' 'Headers' 'Body' 'Attachments'
-      :Case 2.1
-          args←,⊆args
-          (To Subj Body MIMEType)←4↑args,(≢args)↓'' '' '' ''
-      :Else
-          'Invalid constructor argument'⎕SIGNAL 11
-      :EndSelect
-    ∇
-
-    ∇ (rc msg text)←Compose;addHeader;haveAtts;boundary;mime;body;atts;i;n;att;⎕TRAP
-      :Access public
-        ⍝ Compose email content
+      ⍝ Compose email content
       (rc msg text)←¯1 '' ''
-      :If 0∊⍴From
-          →Exit⊣msg←'"From" is not defined'
-      :EndIf
-      :If 0∊⍴Subj
-          →Exit⊣msg←'"Subj" is not defined'
-      :EndIf
-      :If (0∊⍴Body)∧0∊⍴Attachments
-          →Exit⊣msg←'No body or attachments are defined'
-      :EndIf
-      MakeRecipients
-      :If 0∊⍴Recipients
-          →Exit⊣msg←'No recipients are defined'
-      :EndIf
-     
+      _recipients←CompileAllRecipients mailParams
       addHeader←{
           ⍵∧.=' ':''
-          128∧.>⎕UCS ⍵:⍺,': ',⍵,⎕UCS 13 10
-          ⍺,': =?utf-8?B?',(Base64Encoding ⍵),'?=',⎕UCS 13 10
+          128∧.>⎕UCS ⍵:⍺,': ',⍵,CRLF
+          ⍺,': =?utf-8?B?',(Base64Encoding ⍵),'?=',CRLF
       }
-     
       text←'Date'addHeader now    ⍝ Internet-conform date first
-      text,←'From'addHeader normalizeAddr From  ⍝ the user's name & mail address
+      text,←'From'addHeader normalizeAddr From
       text,←'Reply-To'addHeader normalizeAddr ReplyTo ⍝ the reply-to address
       text,←'Organization'addHeader Org
       text,←'X-Mailer'addHeader XMailer
       text,←'MIME-Version'addHeader'1.0'
       text,←∊CRLF∘(,⍨)¨('B'≠⊃¨Recipients)/Recipients ⍝ no headers for BCC recipients
-      text,←'Subject'addHeader Subj ⍝ the message subject
+      text,←'Subject'addHeader(⎕UCS'UTF-8'⎕UCS Subject)     ⍝ the message subject
      
-      :If haveAtts←~0∊⍴Attachments ⍝ Any attachments?
+      :If haveAtts←0≠≢Attachments ⍝ Any attachments?
           boundary←'000',((⍕⎕TS)~' '),'DyalogSMTP',CRLF ⍝ construct a boundary for attachments
           text,←'Content-Type'addHeader'multipart/mixed; boundary="',(¯2↓boundary),'"'
           text,←CRLF
@@ -95,25 +72,16 @@
       :EndIf
      
       :If 0≠≢Body
-          (mime body)←¯2↑'' '',⊆Body
-          :If Body beginsWith'file://'
-              body←⊃⎕NGET 7↓Body
-          :EndIf
-          :If 0∊⍴mime
-              mime←(1+'<html'≡0(819⌶)5↑body)⊃'plain' 'html'
-              mime←'text/',mime,'; charset="UTF-8"'
-          :EndIf
+          mime←(1+∨/'<html'⍷⎕C Body)⊃'plain' 'html'
+          mime←'text/',mime,'; charset="UTF-8"'
           text,←'Content-Type'addHeader mime
           text,←CRLF
-          text,←⎕UCS'UTF-8'⎕UCS body
+          text,←⎕UCS'UTF-8'⎕UCS⊃,/Body,¨⊂CRLF
           text,←CRLF
       :EndIf
      
       :If haveAtts
           text,←haveAtts/'--',boundary
-     
-          Attachments←FormatAttachments Attachments
-     
           :For i :In ⍳n←≢Attachments
               :If 0∊⍴att←i ProcessAttachment i⊃,Attachments
                   msg←'Error processing attachment ',(⍕i),', file="',(1⊃i⊃Attachments),'"'
@@ -121,29 +89,10 @@
               :EndIf
               text,←att
               text,←'--',boundary
-              :If i=n ⍝ last attachment?
-⍝                      text←(¯2↓text),'--',CRLF,CRLF
-              :EndIf
           :EndFor
       :EndIf
       (rc msg)←0 ''
      Exit:
-    ∇
-
-    ∇ Attach attachment
-      :Access public
-      Attachments←(FormatAttachments⍣(~0∊⍴Attachments)⊢Attachments),FormatAttachments attachment
-    ∇
-
-    ∇ atts←FormatAttachments atts
-      :Access public shared
-      :Select |≡atts
-      :CaseList 0 1  ⍝ filename
-          atts←,⊂(⊂,atts),'' ''
-      :Case 2   ⍝ filename mimetype
-          atts←,⊂atts
-      :Case 3   ⍝ filename mimetype content
-      :EndSelect
     ∇
 
     ∇ r←Send
@@ -151,62 +100,40 @@
       r←Client.Send ⎕THIS
     ∇
 
-    ∇ r←i ProcessAttachment arg;mime;content;file;name;⎕TRAP
-      (file mime content)←3↑(⊆arg),'' '' ''
-      :If 0∊⍴file
-          name←'Attachment-',(⍕i),,'<->,4ZI2,<.>,ZI3'⎕FMT 1 5⍴2↓⎕TS  ⍝ make an arbitrary one
-      :Else
-          name←∊¯2↑⎕NPARTS file←(7×'file://'≡7↑file)↓file
-          :If 0∊⍴content ⍝ attempt to read content
-              content←ReadFile file
-          :EndIf
-      :EndIf
+    ∇ r←i ProcessAttachment attachment;mimeType;content;filename;⎕TRAP;path
       r←''
-      :If 0≠≢content
-          :If 0∊⍴mime
-              mime←'application/octet-stream'
-          :EndIf
-          r←'Content-Type: ',mime,'; charset="US-ASCII"; name="',name,'"',CRLF
-          r,←'Content-Disposition: attachment; filename="',name,'"',CRLF
-          r,←'Content-Transfer-Encoding: base64',CRLF,CRLF
-          r,←chunk Base64Encoding content
-      :EndIf
+      (path mimeType)←attachment.(filename mimeType)
+      filename←∊¯2↑⎕NPARTS path
+      :Trap 0
+          content←ReadFile path
+      :Else
+          :Return
+      :EndTrap
+      r,←'Content-Type: ',mimeType,'; charset="US-ASCII"; name="',filename,'"',CRLF
+      r,←'Content-Disposition: attachment; filename="',filename,'"',CRLF
+      r,←'Content-Transfer-Encoding: base64',CRLF,CRLF
+      r,←chunk Base64Encoding content
     ∇
 
     ∇ r←ReadFile file;tno
-        ⍝ We don't trap errors here because we don't want to pretend to send emails with attachments when we might not
+     ⍝ We don't trap errors here because we don't want to pretend sending emails with attachments when we don't
       tno←file ⎕NTIE 0
       r←⎕NREAD tno,(⎕DR' '),¯1 0
       ⎕NUNTIE tno
     ∇
 
-    ∇ MakeRecipients;addrs
-      :Access public
-      _recipients←''
-      _recipients,←'To'FormatList To
-      _recipients,←'CC'FormatList CC
-      _recipients,←'BCC'FormatList BCC
-    ∇
-
-    ∇ list←type FormatList list
-      :If ~0∊⍴list
-          :If 2=≢⍴list ⍝ matrix of names?
-              list←↓list
-          :Else
-              list←list((~∊)⊆⊣)',;' ⍝ otherwise split on ; or ,
-          :EndIf
-          list←{⍵↓⍨-+/∧\' '=⌽⍵}¨list
-          list←(type,': ')∘,¨normalizeAddr¨list
-      :EndIf
+    ∇ r←CompileAllRecipients mailParams;addrs
+      r←''
+      r,←⊂'To: ',normalizeAddr mailParams.To
+      r,←{0=≢⍵:⍵ ⋄ 'CC: '∘,¨normalizeAddr¨⍵}mailParams.CC
+      r,←{0=≢⍵:⍵ ⋄ 'BCC: '∘,¨normalizeAddr¨⍵}mailParams.BCC
     ∇
 
     ∇ r←CRLF
-      :Access public shared
       r←⎕UCS 13 10
     ∇
 
     ∇ r←{len}chunk content;breaks;mask;stuff
-      :Access public shared
         ⍝ Convert content into a vector with embedded cr/lf plus dot-stuffing
         ⍝ len : the maximum line length, excluding cr/lf line ends. Defaults to 72,
         ⍝       as 74 is a safe line length to transmit through SMTP
@@ -258,7 +185,7 @@
     ∇
 
     ∇ r←extractAddr addr;quotes;ind;del
-      :Access public shared
+      :Access Public Shared
         ⍝ extract the mail address from a string
         ⍝ perform very cursory validation on the address
         ⍝ addr - the string to be validated (can be in form "Fred Bloggs" fred@bloggs.com)
@@ -274,7 +201,7 @@
     ∇
 
     ∇ addr←normalizeAddr addr;a
-      :Access public shared
+      :Access Public Shared
       :If 0<≢addr~' '  ⍝ MB: avoid issues when addr is a 0/ManyAddrs
           :If '<>'≢(⊣/,⊢/)a←extractAddr addr
               addr←(addr/⍨~∨\⌽<\⌽a⍷addr),'<',a,'>'
@@ -283,9 +210,9 @@
     ∇
 
     ∇ r←Base64Encoding txt;⎕IO;A;ed
+      :Access Public Shared
         ⍝ ⍵ byte string: 256∧.>⎕ucs ⍵
         ⍝ ← longer (4:3) string in A-Z,a-z,0-9,+/= only
-      :Access public shared
       ⎕IO←0
       A←'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
       ed←{⊃⍵{⍺{2⊥⍉((⌈(⍴⍵)÷⍺),⍺){⍺⍴(×/⍺)↑⍵}⍵},⍉(⍵⍴2)⊤⍺⍺}/⍺}
@@ -293,7 +220,6 @@
     ∇
 
     ∇ rc←now;time;day;mon;s;x;LOCTIME;TIMEZONE;isUnicode;twid
-      :Access public shared
         ⍝ returns an internet-conforming (RFC 2822) timestamp
       :If 'Win'≡3↑⊃'.'⎕WG'APLVersion'
           isUnicode←80=⎕DR'A'

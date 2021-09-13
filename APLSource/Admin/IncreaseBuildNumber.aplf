@@ -1,0 +1,22 @@
+ {r}←IncreaseBuildNumber dummy;cfg;offset;item;version;buff;buff2;buff3;filename
+ r←⍬
+ filename←'apl-package.json'
+ cfg←⊃⎕NGET filename 1
+ (offset item)←⊃'"*version"*:'⎕S 0 2⊣cfg
+ buff←offset↑version←(item+1)⊃cfg
+ version←offset↓version
+ :If '+'∊version
+     buff2←(version⍳'+')↑version
+     version←(≢buff2)↓version
+     buff3←(¯1+version⍳'"')↓version
+     version←(-≢buff3)↓version
+     {⍵:.}1≠⊃⎕VFI version
+     version←⍕1+⊃(//)⎕VFI version
+ :Else
+     buff2←((≢version)-(⌽version)⍳'"')↑version
+     buff3←(≢buff2)↓version
+     version←'+1'
+ :EndIf
+ ((item+1)⊃cfg)←buff,buff2,version,buff3
+ (⊂cfg)⎕NPUT filename 1
+⍝Done

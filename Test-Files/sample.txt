@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>CrashReport</title>
+  <style media="screen" type="text/css">
+   pre {
+    font-family: "APL385 Unicode"; font-size: 14px;
+   }
+   h1 {
+    font-family: "Courier New";
+   }
+   table#apl {
+    font-family: "APL385 Unicode"; font-size: 14px;
+   }
+  </style>
+</head>
+<body>
+  <h1>Crash Report</h1>
+  <table id="apl">
+<tr><td><b>  Version: </b></td><td> Windows-64  18.0.44280.0  W  Development </td></tr>
+<tr><td><b>  ⎕WSID: </b></td><td>CLEAR WS</td></tr>
+<tr><td><b>  ⎕IO: </b></td><td>1</td></tr>
+<tr><td><b>  ⎕ML: </b></td><td>1</td></tr>
+<tr><td><b>  ⎕WA: </b></td><td>122201952</td></tr>
+<tr><td><b>  ⎕TNUMS: </b></td><td>5 0 3</td></tr>
+<tr><td><b>  Category: </b></td><td></td></tr>
+<tr><td><b>  EM: </b></td><td>SYNTAX ERROR</td></tr>
+<tr><td><b>  HelpURL: </b></td><td></td></tr>
+<tr><td><b>  EN: </b></td><td>2</td></tr>
+<tr><td><b>  ENX: </b></td><td>0</td></tr>
+<tr><td><b>  InternalLocation: </b></td><td> parse.c  6703</td></tr>
+<tr><td><b>  Message: </b></td><td></td></tr>
+<tr><td><b>  OSError: </b></td><td>0 0   </td></tr>
+<tr><td><b>  Current Dir: </b></td><td>/path/</td></tr>
+<tr><td><b>  Command line: </b></td><td>"/path/.../Dyalog.exe" MAXWS=128MB -Dcw -exec_setup=1 </td></tr>  </table><p><b>Stack:</b></p>
+<pre>
+#.Tatin.HandleError.Process[22]
+#.Tatin.RumbaLean.Core.TrapRequest[11]
+#.Tatin.RumbaLean.Core.ExecuteRequest[4]
+#.Tatin.RumbaLean.Core.ExecuteRequestHandler[13]
+#.Tatin.RumbaLean.Core.HandleRequest[7]
+#.Tatin.RumbaLean.Core.WaitForData[12]
+#.Tatin.RumbaLean.Core.WaitForData[5]
+#.Tatin.RumbaLean.Core.ServerLoop[0]
+#.Tatin.RumbaLean.Core.ServerLoop[4]
+#.Tatin.Plodder.Run[0]
+#.Tatin.Admin.RunTestServer[9]
+#.Tatin.TestCasesServer.Test_001[7]
+#.Tatin.Tester2.ExecuteTestFunction[21]
+#.Tatin.Tester2.ProcessTestCases[36]
+#.Tatin.Tester2.Run__[56]
+#.Tatin.Tester2.Run[18]
+#.Tatin.TestCasesServer.RunTests[2]
+</pre>
+<p><b>Error Message:</b></p>
+<pre>
+SYNTAX ERROR
+ProcessTestCommands[27] ∘∘∘
+                          ∧
+</pre>
+</body>
+</html>
