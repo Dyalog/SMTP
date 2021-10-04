@@ -735,7 +735,7 @@
 
         ∇ rc←now;time;day;mon;s;x;LOCTIME;TIMEZONE;isUnicode;twid
           :Access public shared
-        ⍝ returns an internet-conforming (RFC 2822) timestamp
+        ⍝ returns an internet-conforming (RFC 5322) timestamp
           :If 'Win'≡3↑⊃'.'⎕WG'APLVersion'
               isUnicode←80=⎕DR'A'
               twid←64 32[1+isUnicode] ⍝ set width for text elements based on unicode or not
@@ -752,9 +752,9 @@
               rc←rc,,'I4,< >,ZI2,<:>,ZI2,<:>,ZI2,< >'⎕FMT 1 4⍴time[1 5 6 7]
         ⍝ call timezone function and calculate offset from GMT
               x←TIMEZONE⊂0(twid⍴' ')(8⍴0)0(twid⍴' ')(8⍴0)0
-              x←(⊃x),2⊃x
+              x←(1⌈⊃x),2⊃x ⍝ 1⌈ to accomodate timezones that do not recognize daylight savings time
               s←'+-'[1+0>x←(-2⊃x)+-x[(5 8)[⊃x]]]
-              rc←rc,s,,'ZI4,< (GMT)>'⎕FMT|100×x÷60
+              rc←rc,s,,'ZI4,< (UTC)>'⎕FMT|100×x÷60
           :Else
               rc←1⊃⎕SH'date -R' ⍝ unix - call date command
           :EndIf
