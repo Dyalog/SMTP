@@ -1,4 +1,4 @@
-﻿:Class SMTP
+:Class SMTP
 
 ⍝ Based on original work by Conrad Hoesle-Kienzlen in 1999
 ⍝ Updated by Morten Kromberg to use UTF-8 text, 2009
@@ -529,7 +529,7 @@
               text,←'Content-Type'addHeader mime
               text,←'Content-Transfer-Encoding'addHeader'8bit'
               text,←CRLF
-              text,←⎕UCS'UTF-8'⎕UCS body
+              text,←⎕UCS'UTF-8'⎕UCS{2↓{∊(⊂'..')@(⎕←⍸(⍵='.')∧¯1↓1,⍵∊CRLF)⊢⍵}CRLF,⍵}body   ⍝ stuff leading dots
               text,←CRLF
           :EndIf
          
