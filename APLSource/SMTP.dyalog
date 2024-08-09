@@ -66,7 +66,7 @@
     unless←↓⍨
     okay←{0=⊃⍺.(rc msg log)←{3↑⍵,(≢⍵)↓¯99 '' ''},⊆⍵}
     empty←0∘∊⍴
-    lc←0∘(819⌶)
+    lc←{2::0(819⌶)⍵ ⋄ ¯3 ⎕C ⍵}
     splitOn←{⍵{(≢⍺)↓¨⍵⊂⍨⍺⍷⍵}⍵,⍺} ⍝ e.g. response splitOn CRLF
 
     ∇ r←Config
@@ -523,7 +523,7 @@
                   body←⊃⎕NGET 7↓Body
               :EndIf
               :If 0∊⍴mime
-                  mime←(1+'<html'≡0(819⌶)5↑body)⊃'plain' 'html'
+                  mime←(1+'<html'≡{2::0(819⌶)⍵ ⋄ ¯3 ⎕C ⍵}5↑body)⊃'plain' 'html'
                   mime←'text/',mime,'; charset=utf-8;'
               :EndIf
               text,←'Content-Type'addHeader mime
