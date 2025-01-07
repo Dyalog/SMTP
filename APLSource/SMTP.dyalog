@@ -199,7 +199,7 @@
       →Err if 0≠⊃logIt(rc msg)←Do text,CRLF,'.'
       →Exit
      Err:
-      logIt(rc msg)←Do'RSET'
+      logIt Do'RSET'
      Exit:
     ∇
 
